@@ -1,0 +1,11 @@
+{
+  "name": "My PCOS Daily Dashboard",
+  "short_name": "PCOS Tracker",
+  "description": "A private daily PCOS wellness and weight-management tracker.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f6f1",
+  "theme_color": "#315c4b",
+  "icons": []
+}

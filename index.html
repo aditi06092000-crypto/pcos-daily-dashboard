@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#315c4b">
+<meta name="description" content="A private daily PCOS wellness and weight-management tracker.">
+<link rel="manifest" href="manifest.json">
+<title>My PCOS Daily Dashboard</title>
+<style>
+:root{--bg:#f5f6f1;--card:#fff;--ink:#24332b;--muted:#68756d;--green:#315c4b;--green2:#e5eee8;--line:#e2e7e1;--amber:#f7efda;--shadow:0 4px 18px rgba(32,54,41,.06)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.app{max-width:760px;margin:auto;padding:env(safe-area-inset-top) 16px calc(28px + env(safe-area-inset-bottom))}
+header{padding:22px 2px 16px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}h1{font-size:25px;line-height:1.15;margin:0 0 7px;letter-spacing:-.5px}h2{font-size:18px;margin:0 0 13px}h3{font-size:15px;margin:0 0 6px}.sub{color:var(--muted);font-size:13px}.pill{background:var(--green2);color:var(--green);padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.datebar{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:11px 12px;margin-bottom:14px;box-shadow:var(--shadow)}.datebar input{min-width:0;flex:1;border:0;background:transparent;color:var(--ink);font:inherit;font-weight:650}
+button{font:inherit;cursor:pointer;border:0;border-radius:11px;padding:10px 13px;background:var(--green);color:white;font-weight:650}button.secondary{background:#edf1ed;color:var(--ink)}button.small{padding:7px 10px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-bottom:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:var(--shadow);min-width:0}.metric-label{color:var(--muted);font-size:12px;font-weight:650}.metric{font-size:26px;font-weight:780;letter-spacing:-.6px;margin:4px 0}.unit{font-size:12px;color:var(--muted)}.progress{height:7px;background:#edf0eb;border-radius:99px;overflow:hidden;margin-top:9px}.progress span{display:block;height:100%;background:var(--green);width:0%;border-radius:99px;transition:width .2s}
+.section{margin:14px 0}.section .card{padding:17px}.fieldrow{display:grid;grid-template-columns:1fr 110px;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}.fieldrow:last-child{border-bottom:0}.fieldrow label{font-size:14px}.fieldrow input[type=number]{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px;background:#fff;color:var(--ink);font:inherit}
+.targets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.target{padding:11px;border-radius:12px;background:#f6f8f5}.target b{display:block;font-size:19px}.target span{font-size:12px;color:var(--muted)}
+.checklist{display:grid;gap:0}.check{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px}.check:last-child{border-bottom:0}.check input{width:20px;height:20px;accent-color:var(--green);flex-shrink:0;margin:0}.check small{display:block;color:var(--muted);margin-top:2px;font-size:12px}
+.dayplan{display:grid;gap:9px}.workout{border:1px solid var(--line);border-radius:13px;padding:12px;display:flex;gap:10px;align-items:flex-start}.workout input{accent-color:var(--green);width:19px;height:19px;margin-top:2px}.workout p{margin:4px 0 0;color:var(--muted);font-size:13px}
+textarea{width:100%;min-height:84px;border:1px solid var(--line);border-radius:12px;padding:11px;font:inherit;resize:vertical;color:var(--ink)}.note{background:var(--amber);border-radius:13px;padding:12px 13px;font-size:13px;color:#594b29}.actions{display:flex;gap:9px;flex-wrap:wrap}.footer{color:var(--muted);font-size:12px;padding:16px 2px 6px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#24332b;color:white;border-radius:999px;padding:10px 15px;font-size:13px;display:none;box-shadow:var(--shadow)}
+@media(min-width:600px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.targets{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+ <div><h1>My PCOS Dashboard</h1><div class="sub">Small habits, steady progress.</div></div>
+ <div class="pill">DAILY TRACKER</div>
+</header>
+<div class="datebar">
+ <button class="secondary small" id="prevDay" aria-label="Previous day">‹</button>
+ <input id="date" type="date" aria-label="Tracking date">
+ <button class="secondary small" id="nextDay" aria-label="Next day">›</button>
+ <button class="small" id="todayBtn">Today</button>
+</div>
+<div class="grid">
+ <div class="card"><div class="metric-label">WEIGHT</div><div class="metric"><span id="weightMetric">69.0</span><span class="unit"> kg</span></div><div class="sub">Log when useful</div></div>
+ <div class="card"><div class="metric-label">STEPS</div><div class="metric"><span id="stepsMetric">0</span></div><div class="sub">Goal: 6,000</div><div class="progress"><span id="stepsBar"></span></div></div>
+ <div class="card"><div class="metric-label">CALORIES</div><div class="metric"><span id="calMetric">0</span><span class="unit"> / 1,550</span></div><div class="progress"><span id="calBar"></span></div></div>
+ <div class="card"><div class="metric-label">PROTEIN</div><div class="metric"><span id="proteinMetric">0</span><span class="unit"> / 85 g</span></div><div class="progress"><span id="proteinBar"></span></div></div>
+</div>
+<div class="section card">
+ <h2>Daily targets</h2>
+ <div class="targets">
+  <div class="target"><b>1,500–1,600</b><span>Calories · kcal</span></div>
+  <div class="target"><b>80–90 g</b><span>Protein</span></div>
+  <div class="target"><b>~175 g</b><span>Carbohydrates</span></div>
+  <div class="target"><b>25–30 g</b><span>Fibre</span></div>
+ </div>
+ <p class="sub">Starting estimates, not medical prescriptions. Your actual needs may differ. Track trends over several weeks, not one day.</p>
+</div>
+<div class="section card">
+ <h2>Log today's intake</h2>
+ <div class="fieldrow"><label for="calories">Calories (kcal)</label><input id="calories" type="number" min="0" max="10000" step="10" placeholder="e.g. 1550"></div>
+ <div class="fieldrow"><label for="protein">Protein (g)</label><input id="protein" type="number" min="0" max="400" step="1" placeholder="e.g. 85"></div>
+ <div class="fieldrow"><label for="carbs">Carbohydrates (g)</label><input id="carbs" type="number" min="0" max="800" step="1" placeholder="e.g. 175"></div>
+ <div class="fieldrow"><label for="fibre">Fibre (g)</label><input id="fibre" type="number" min="0" max="150" step="1" placeholder="e.g. 27"></div>
+ <div class="fieldrow"><label for="water">Water (glasses)</label><input id="water" type="number" min="0" max="40" step="1" placeholder="e.g. 8"></div>
+ <div class="fieldrow"><label for="weight">Weight (kg, optional)</label><input id="weight" type="number" min="20" max="300" step="0.1" placeholder="e.g. 69"></div>
+ <div class="fieldrow"><label for="steps">Steps</label><input id="steps" type="number" min="0" max="100000" step="100" placeholder="e.g. 6000"></div>
+ <div style="padding-top:13px"><button id="saveBtn">Save today's log</button> <button class="secondary" id="clearBtn">Clear this day</button></div>
+</div>
+<div class="section card">
+ <h2>Daily habits</h2>
+ <div class="checklist" id="habits">
+  <label class="check"><input type="checkbox" data-habit="proteinMeals"><span>Included protein with main meals<small>Dal, curd, paneer, tofu, soy chunks or beans.</small></span></label>
+  <label class="check"><input type="checkbox" data-habit="plants"><span>Ate vegetables and whole fruit<small>Build fibre gradually and drink fluids regularly.</small></span></label>
+  <label class="check"><input type="checkbox" data-habit="movement"><span>Reached my step goal or made progress<small>Today's initial target: 6,000 steps.</small></span></label>
+  <label class="check"><input type="checkbox" data-habit="workout"><span>Completed planned movement or workout<small>Rest days count too; choose gentle movement if planned.</small></span></label>
+  <label class="check"><input type="checkbox" data-habit="waterHabit"><span>Drank water regularly</span></label>
+  <label class="check"><input type="checkbox" data-habit="sleep"><span>Prioritised 7–9 hours of sleep</span></label>
+ </div>
+</div>
+<div class="section card">
+ <h2>Workout planner</h2>
+ <div class="dayplan">
+  <label class="workout"><input type="checkbox" data-workout="mon"><span><b>Monday · Full body A</b><p>Leg press, chest press, seated row, glute bridges. Start with 2 sets each.</p></span></label>
+  <label class="workout"><input type="checkbox" data-workout="tue"><span><b>Tuesday · Walking</b><p>Comfortable walk; build towards 6,000 steps.</p></span></label>
+  <label class="workout"><input type="checkbox" data-workout="wed"><span><b>Wednesday · Recovery</b><p>Easy walk, mobility or gentle yoga.</p></span></label>
+  <label class="workout"><input type="checkbox" data-workout="thu"><span><b>Thursday · Full body B</b><p>Squat variation, lat pulldown, light hip hinge, dead bug. Start with 2 sets each.</p></span></label>
+  <label class="workout"><input type="checkbox" data-workout="fri"><span><b>Friday · Walking</b><p>Step target and breaks from sitting.</p></span></label>
+  <label class="workout"><input type="checkbox" data-workout="sat"><span><b>Saturday · Enjoyable cardio</b><p>20–30 minutes of cycling, dancing, swimming or brisk walking.</p></span></label>
+  <label class="workout"><input type="checkbox" data-workout="sun"><span><b>Sunday · Rest and review</b><p>Recovery is part of the plan.</p></span></label>
+ </div>
+</div>
+<div class="section card">
+ <h2>Period & symptom notes</h2>
+ <div class="fieldrow"><label for="period">Period / cycle note</label><input id="period" type="text" maxlength="100" placeholder="e.g. day 1 / no period"></div>
+ <div class="fieldrow"><label for="energy">Energy today</label><select id="energy" style="width:100%;padding:9px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink)"><option value="">Choose</option><option>Low</option><option>Okay</option><option>Good</option></select></div>
+ <div style="padding-top:12px"><label for="notes" class="sub">Notes (hunger, symptoms, mood, etc.)</label><textarea id="notes" placeholder="Anything you want to remember about today…"></textarea></div>
+ <p class="sub">Period and symptom tracking can be useful to discuss with your clinician.</p>
+</div>
+<div class="note"><b>PCOS care reminder:</b> Irregular periods deserve medical follow-up. If you have gone around 90 days without a period, contact your gynaecologist promptly. This tracker is for wellness tracking, not diagnosis or treatment.</div>
+<div class="section actions">
+ <button id="exportBtn">Export my data (CSV)</button>
+ <button class="secondary" id="installBtn" hidden>Install app</button>
+</div>
+<div class="footer">Your logs are stored in this browser on this device. They are not synced to another phone and may be lost if browser data is cleared. Export a backup regularly. Targets are estimates; adjust with a qualified clinician or dietitian when needed.</div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const $=id=>document.getElementById(id);
+const fields=['calories','protein','carbs','fibre','water','weight','steps','period','energy','notes'];
+const keyFor=date=>'pcos-dashboard-v1:'+date;
+let currentDate='';
+let installPrompt=null;
+function todayISO(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block';clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.style.display='none',2100)}
+function collect(){
+ const obj={}; fields.forEach(id=>obj[id]=$(id).value);
+ obj.habits={};document.querySelectorAll('[data-habit]').forEach(el=>obj.habits[el.dataset.habit]=el.checked);
+ obj.workouts={};document.querySelectorAll('[data-workout]').forEach(el=>obj.workouts[el.dataset.workout]=el.checked);
+ obj.updatedAt=new Date().toISOString();return obj;
+}
+function save(silent=false){if(!currentDate)return;localStorage.setItem(keyFor(currentDate),JSON.stringify(collect()));updateMetrics();if(!silent)toast('Saved for '+currentDate)}
+function load(date){
+ currentDate=date;$('date').value=date;
+ let obj={};try{obj=JSON.parse(localStorage.getItem(keyFor(date))||'{}')}catch(e){}
+ fields.forEach(id=>$(id).value=obj[id]??'');
+ document.querySelectorAll('[data-habit]').forEach(el=>el.checked=!!(obj.habits&&obj.habits[el.dataset.habit]));
+ document.querySelectorAll('[data-workout]').forEach(el=>el.checked=!!(obj.workouts&&obj.workouts[el.dataset.workout]));
+ updateMetrics();
+}
+function updateMetrics(){
+ const val=id=>Number($(id).value)||0;
+ $('weightMetric').textContent=val('weight')?val('weight').toFixed(1):'—';
+ $('stepsMetric').textContent=val('steps').toLocaleString('en-IN');
+ $('calMetric').textContent=val('calories').toLocaleString('en-IN');
+ $('proteinMetric').textContent=val('protein');
+ $('stepsBar').style.width=Math.min(100,val('steps')/6000*100)+'%';
+ $('calBar').style.width=Math.min(100,val('calories')/1550*100)+'%';
+ $('proteinBar').style.width=Math.min(100,val('protein')/85*100)+'%';
+}
+$('saveBtn').addEventListener('click',()=>save());
+$('date').addEventListener('change',e=>{save(true);load(e.target.value)});
+$('todayBtn').addEventListener('click',()=>{save(true);load(todayISO())});
+$('prevDay').addEventListener('click',()=>{save(true);const d=new Date(currentDate+'T12:00:00');d.setDate(d.getDate()-1);load(d.toISOString().slice(0,10))});
+$('nextDay').addEventListener('click',()=>{save(true);const d=new Date(currentDate+'T12:00:00');d.setDate(d.getDate()+1);load(d.toISOString().slice(0,10))});
+$('clearBtn').addEventListener('click',()=>{if(confirm('Clear all entries for '+currentDate+'?')){localStorage.removeItem(keyFor(currentDate));load(currentDate);toast('Day cleared')}});
+document.querySelectorAll('[data-habit],[data-workout]').forEach(el=>el.addEventListener('change',()=>save(true)));
+fields.forEach(id=>$(id).addEventListener('change',()=>save(true)));
+$('exportBtn').addEventListener('click',()=>{
+ const rows=[['date',...fields,'habits_completed','workouts_completed']];
+ const dates=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('pcos-dashboard-v1:'))dates.push(k.slice('pcos-dashboard-v1:'.length))}
+ dates.sort();dates.forEach(date=>{let o={};try{o=JSON.parse(localStorage.getItem(keyFor(date))||'{}')}catch(e){};rows.push([date,...fields.map(f=>o[f]??''),Object.values(o.habits||{}).filter(Boolean).length,Object.values(o.workouts||{}).filter(Boolean).length])});
+ const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='pcos-dashboard-data.csv';a.click();URL.revokeObjectURL(url);toast('Export prepared');
+});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('installBtn').hidden=false});
+$('installBtn').addEventListener('click',async()=>{if(!installPrompt){toast('Use your browser menu and choose Add to Home Screen');return}installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('installBtn').hidden=true});
+if('serviceWorker'in navigator && location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+load(todayISO());
+</script>
+</body></html>
